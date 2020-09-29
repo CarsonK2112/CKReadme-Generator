@@ -4,79 +4,78 @@ const axios = require("axios")
 
 // array of questions for user
 const questions = [
-  "What is the title of your project?",
-  "How would you describe your project?",
-  "What is the installation process of your project?",
-  "How does your project function?",
-
+  {
+    type: "input",
+    name: "Project Readme",
+    message: "What is the title of your project?",
+  
+  },
+  {
+    type: "input",
+    name: "Description",
+    message: "How would you describe your project?",
+  
+  },
+  {
+    type: "input",
+    name: "Table of Contents?",
+    message: "How would you lay out your table of contents?",
+  },
+  {
+    type: "input",
+    name: "Installation",
+    message: "What is the installation process of your project?",
+  
+  },
+  {
+    type: "input",
+    name: "Functionality",
+    message: "How does your project function?",
+  
+  },
+  {
+    type: "input",
+    name: "GitHub username",
+    message: "Enter your GitHub username",
+  
+  },
 ];
 
-const licenses = [
-  "Public Domain",
-  "Permissive",
-  "LGPL",
-  "CopyLeft",
-  "Proprietary",
-];
+function askQuestions() {
 
-async function askQuestions() {
-  for (let question of questions) {
-    await inquirer.prompt([
-      {
-        type: "input",
-        message: question,
-        name: "Readme name",
-      },
-    ]);
-  };
-  
+  inquirer.prompt(questions).then(res => {
+    console.log(res)
+    let textoutput = "# "
+    let toc = ""
+    let rx = new RegExp(/ /g)
+    for (let prop in res) {
+      if (prop !== 'readme title') {
+        textoutput += "## " + prop + "<br> \n" + res[prop] + "<br> \n"
+        toc += "["+prop+"](#"+prop.toLowerCase().replace(rx,"-")+") \n" 
+        // [Project Readme](#project-readme)
+        }
+        else {
+          textoutput += prop + "<br> \n" + res[prop] + "<br> \n"
+        }
+    }
+    console.log(textoutput)
+    return toc + textoutput
+  }).then(readmetext => {
+    fs.writeFile('readme.md', readmetext, err => console.log('readme.md saved!'))
+  }).catch(error => {
+    if(error.isTtyError) {
+      // Prompt couldn't be rendered in the current environment
+    } else {
+      // Something else when wrong
+    }
+  });
 }
 
-async function tablecontentcreator() {
-  
-}
-
-// Function has to be called outside askQuestions
-// If there's an argument you put it inside the parentheses when you call the function
-
-askQuestions()
-
-// Next steps for askQuestions is to save the answer somewhere
-
-// function to write README file
-// Put the input into the Readme
-function writeToFile(fileName, data) {}
-
-// fs.writeFile("readme.md", process.argv[2], function(err) {
-//   if (err) {
-//     return console.log(err);
-//   }
-
-//   console.log("Success!")
-
-// });
+const answers = askQuestions()
+// console.log(answers)
 
 // function to initialize program
 function init() {}
 
 // function call to initialize program
 init();
-
-inquirer
-  .prompt({
-    message: "Enter your GitHub username",
-    name: "username"
-  })
-  .then(function({ username }) {
-    const queryUrl = `https://api.github.com/users/${username}/repos?per_page=100`;
-
-    axios.get(queryUrl)
-    .then(res => {
-      const repos = res.data.map(repo => repo.name)
-      
-      fs.writeFile('repos.txt', repos.join('\n'), err => console.log('Repos.txt saved!'))
-
-
-    });
-
-  });
